@@ -1,10 +1,31 @@
 const AWS = require('aws-sdk');
 require("dotenv").config();
 const { hlsConvert } = require('./process');
+const mysql = require('mysql');
+
 
 const sqs = new AWS.SQS({ region: process.env.AWS_REGION });
 
 const QUEUE_URL = process.env.AWS_SQS_QUEUE_URL;
+
+
+// RDS Database Connection
+const connection = mysql.createConnection({
+    host: process.env.RDS_HOSTNAME,
+    user: process.env.RDS_USERNAME,
+    password: process.env.RDS_PASSWORD,
+    port: process.env.RDS_PORT_NUMBER,
+    database: process.env.RDS_DATABASE_NAME
+});
+connection.connect(err => {
+    if (err) {
+        console.error('Error connecting to the database:', err);
+        process.exit(1);
+    } else {
+        console.log('Connected to the RDS database');
+    }
+});
+
 
 async function pollSQS() {
     try {
@@ -26,6 +47,10 @@ async function pollSQS() {
                 console.log("Message received: ", config);
                 await hlsConvert(config);
 
+                // Update the video status in the database
+                const videoId = config.key.split('/').pop().replace('.mp4', '');
+                await updateVideoStatus(videoId, 'processed');
+
                 // Delete the message after processing
                 const deleteParams = {
                     QueueUrl: QUEUE_URL,
@@ -39,6 +64,20 @@ async function pollSQS() {
     } catch (error) {
         console.error('Error polling SQS:', error);
     }
+}
+
+async function updateVideoStatus(videoId, status) {
+    return new Promise((resolve, reject) => {
+        const query = 'UPDATE videos SET status = ? WHERE video_id = ?';
+        connection.query(query, [status, videoId], (error, results) => {
+            if (error) {
+                console.error('Error updating video status:', error);
+                return reject(error);
+            }
+            console.log('Video status updated:', videoId, status);
+            resolve(results);
+        });
+    });
 }
 
 async function main() {
