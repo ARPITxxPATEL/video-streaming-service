@@ -7,7 +7,11 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
-const s3 = new AWS.S3();
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION,
+});
 
 const resolutions = [
     { name: '360p', width: 640, height: 360, bitrate: '800k', maxrate: '856k', bufsize: '1200k' },
