@@ -4,6 +4,7 @@ require('dotenv').config();
 const connection = require('./models/db');
 
 const authRoutes = require('./routes/auth');
+const videoRoutes = require('./routes/video');
 
 
 // Database connection
@@ -23,24 +24,7 @@ app.use(cors());
 
 // Routes
 app.use('/api/auth', authRoutes);
-
-
-app.use('/api/hi', (req, res) => {
-    const query = 'SELECT * FROM user';
-    connection.query(query, (error, results) => {
-        if (error) {
-          console.error('Error executing query:', error);
-          res.status(500).send('Internal Server Error');
-          return;
-        }
-        res.json(results);
-      });
-})
-
-app.use('/hi', (req, res) => {
-    res.send('hi')
-})
-
+app.use('/api/video', videoRoutes);
 
 // Start server
 app.listen(process.env.PORT, () => {
