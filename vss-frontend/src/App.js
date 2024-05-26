@@ -1,24 +1,34 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Home from './pages/Home';
+import Profile from './pages/Profile';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Sidebar from './components/Sidebar';
+import { Container, Box } from '@mui/material';
 
 function App() {
   return (
     <Router>
-      <div className="app">
-        <div className="sidebar">
-          <ul>
-            <li><Link to="/">Home</Link></li>
-            <li><Link to="/profile">Profile</Link></li>
-          </ul>
-        </div>
-        <div className="content">
-          <Switch>
-            <Route exact path="/" component={Home} />
-            <Route path="/profile" component={Profile} />
-          </Switch>
-        </div>
-      </div>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="*"
+          element={
+            <Box display="flex">
+              <Sidebar />
+              <Container>
+                <Routes>
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="*" element={<Navigate to="/home" />} />
+                </Routes>
+              </Container>
+            </Box>
+          }
+        />
+      </Routes>
     </Router>
   );
 }
