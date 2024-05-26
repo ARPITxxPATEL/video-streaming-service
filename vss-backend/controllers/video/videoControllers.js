@@ -1,11 +1,11 @@
-const getList = require('./getList');
+const getVideoList = require('./getVideoList');
 const getVideoListByUser = require('./getVideoListByUser');
 const getSignedCookie = require('./getSignedCookie');
 const getS3SignedUrl = require('./getS3SignedUrl');
 const postUpload = require('./postUpload');
 
 exports.controllers = {
-  getList,
+  getVideoList,
   getVideoListByUser,
   getSignedCookie,
   getS3SignedUrl,

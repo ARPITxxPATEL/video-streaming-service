@@ -1,35 +1,40 @@
-const AWS = require('aws-sdk');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 const { v4: uuidv4 } = require('uuid');
 
 // Initialize the S3 client
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+const s3 = new S3Client({
+    credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    },
     region: process.env.AWS_REGION
 });
 
-const getS3SignedUrl = (req, res) => {
+const getS3SignedUrl = async (req, res) => {
     const videoId = uuidv4();
-    const s3Params = {
-        Bucket: process.env.S3_BUCKET_NAME,
-        Key: `videos/${videoId}.mp4`,
-        Expires: 5 * 60, // URL expiration time in seconds
-        ContentType: 'video/mp4' // Adjust content type if needed
-    };
+    const bucketName = process.env.S3_BUCKET_NAME;
+    const objectKey = `videos/${videoId}.mp4`;
 
-    s3.getSignedUrl('putObject', s3Params, (err, url) => {
-        if (err) {
-            console.error("Error generating signed URL", err);
-            return res.status(500).send({
-                message: "Error generating signed URL"
-            });
-        }
+    const command = new PutObjectCommand({
+        Bucket: bucketName,
+        Key: objectKey,
+        ContentType: 'video/mp4' // Adjust content type as needed
+    });
+
+    try {
+        const uploadUrl = await getSignedUrl(s3, command, { expiresIn: 300 }); // URL expiration time in seconds (5 minutes)
 
         res.status(200).send({
             videoId: videoId,
-            uploadUrl: url
+            uploadUrl: uploadUrl
         });
-    });
+    } catch (error) {
+        console.error("Error generating signed URL", error);
+        res.status(500).send({
+            message: "Error generating signed URL"
+        });
+    }
 };
 
 module.exports = getS3SignedUrl;
