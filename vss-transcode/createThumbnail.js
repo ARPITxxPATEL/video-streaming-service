@@ -3,7 +3,7 @@ const ffmpeg = require('fluent-ffmpeg');
 
 const { uploadToS3 } = require('./utils');
 
-async function createThumbnail(config, inputFilePath, tempDir, timestamp = '00:00:01') {
+async function createThumbnail(config, inputFilePath, tempDir, timestamp = '00:00:03') {
     const thumbnailPath = path.join(tempDir, `${config.videoId}.jpeg`);
 
     try {
