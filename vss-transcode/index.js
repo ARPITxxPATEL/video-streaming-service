@@ -20,14 +20,6 @@ const connection = mysql.createConnection({
     port: process.env.RDS_PORT_NUMBER,
     database: process.env.RDS_DATABASE_NAME
 });
-connection.connect(err => {
-    if (err) {
-        console.error('Error connecting to the database:', err);
-        process.exit(1);
-    } else {
-        console.log('Connected to the RDS database');
-    }
-});
 
 async function pollSQS() {
     // Create a temporary directory to store the downloaded video
@@ -99,6 +91,14 @@ async function updateVideoStatus(videoId, status) {
 }
 
 async function main() {
+    await connection.connect(err => {
+        if (err) {
+            console.error('Error connecting to the database:', err);
+            process.exit(1);
+        } else {
+            console.log('Connected to the RDS database');
+        }
+    });
     while (true) {
         await pollSQS();
         // Wait for 6 second before polling again
