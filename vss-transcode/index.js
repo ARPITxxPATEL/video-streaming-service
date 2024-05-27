@@ -1,12 +1,15 @@
 const AWS = require('aws-sdk');
 require("dotenv").config();
-const { hlsConvert } = require('./process');
 const mysql = require('mysql');
+const fs = require('fs');
+const path = require('path');
+
+const { hlsConvert } = require('./hlsConvert');
+const { createThumbnail } = require('./createThumbnail');
+const { downloadFromS3 } = require('./utils');
 
 
 const sqs = new AWS.SQS({ region: process.env.AWS_REGION });
-
-const QUEUE_URL = process.env.AWS_SQS_QUEUE_URL;
 
 
 // RDS Database Connection
@@ -26,11 +29,13 @@ connection.connect(err => {
     }
 });
 
-
 async function pollSQS() {
+    // Create a temporary directory to store the downloaded video
+    const tempDir = fs.mkdtempSync(path.join(process.cwd(), 'ffmpeg-'));
+
     try {
         const params = {
-            QueueUrl: QUEUE_URL,
+            QueueUrl: process.env.AWS_SQS_QUEUE_URL,
             MaxNumberOfMessages: 1,
             WaitTimeSeconds: 20,
         };
@@ -42,18 +47,28 @@ async function pollSQS() {
                 const config = {
                     bucketName: event.Records[0].s3.bucket.name,
                     key: event.Records[0].s3.object.key,
-                    destPrefixKey: event.Records[0].s3.object.key.replace(/\.mp4/, "").replace('videos', 'processed')
+                    destPrefixKey: event.Records[0].s3.object.key.replace(/\.mp4/, "").replace('videos', 'processed'),
+                    thumbnailBucketName: process.env.AWS_THUMBNAIL_BUCKET_NAME,
+                    videoId: event.Records[0].s3.object.key.split('/').pop().replace('.mp4', ''),
                 };
                 console.log("Message received: ", config);
-                await hlsConvert(config);
+
+                // Download the video from S3
+                const inputFilePath = await downloadFromS3(config.bucketName, config.key, tempDir);
+
+                // Process the video
+                await hlsConvert(config, inputFilePath, tempDir);
+
+                // Create a thumbnail for the video
+                await createThumbnail(config, inputFilePath, tempDir);                
 
                 // Update the video status in the database
                 const videoId = config.key.split('/').pop().replace('.mp4', '');
                 await updateVideoStatus(videoId, 'processed');
 
-                // Delete the message after processing
+                // Delete the message after processing from the SQS queue
                 const deleteParams = {
-                    QueueUrl: QUEUE_URL,
+                    QueueUrl: process.env.AWS_SQS_QUEUE_URL,
                     ReceiptHandle: message.ReceiptHandle
                 };
                 await sqs.deleteMessage(deleteParams).promise();
@@ -63,6 +78,9 @@ async function pollSQS() {
         }
     } catch (error) {
         console.error('Error polling SQS:', error);
+    }
+    finally{
+        fs.rmSync(tempDir, { recursive: true });
     }
 }
 

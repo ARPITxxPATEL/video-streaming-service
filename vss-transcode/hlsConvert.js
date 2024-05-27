@@ -1,17 +1,11 @@
-const AWS = require('aws-sdk');
-require("aws-sdk/lib/maintenance_mode_message").suppress = true;
 const ffmpeg = require('fluent-ffmpeg');
 const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
 
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION,
-});
+const { uploadToS3 } = require('./utils');
+
 
 const resolutions = [
     { name: '360p', width: 640, height: 360, bitrate: '800k', maxrate: '856k', bufsize: '1200k' },
@@ -20,15 +14,6 @@ const resolutions = [
     { name: '1080p', width: 1920, height: 1080, bitrate: '5000k', maxrate: '5350k', bufsize: '7500k' }
 ];
 
-async function uploadToS3(bucket, key, filePath, contentType) {
-    const fileStream = fs.createReadStream(filePath);
-    return s3.upload({
-        Bucket: bucket,
-        Key: key,
-        Body: fileStream,
-        ContentType: contentType
-    }).promise();
-}
 
 function generateFFmpegCommand(resolution, inputFilePath, outputDir) {
     return new Promise((resolve, reject) => {
@@ -69,6 +54,7 @@ function generateFFmpegCommand(resolution, inputFilePath, outputDir) {
     });
 }
 
+// Generate an index playlist file for the HLS stream i.e. index.m3u8
 function generateIndexPlaylist(outputDir) {
     const playlistContent = resolutions.map(resolution =>
         `#EXT-X-STREAM-INF:BANDWIDTH=${parseInt(resolution.bitrate) * 1000},RESOLUTION=${resolution.width}x${resolution.height}\n${resolution.name}.m3u8`
@@ -79,15 +65,8 @@ function generateIndexPlaylist(outputDir) {
     return indexPath;
 }
 
-async function hlsConvert(config) {
-    const tempDir = fs.mkdtempSync(path.join(process.cwd(), 'ffmpeg-'));
-
+async function hlsConvert(config, inputFilePath, tempDir) {
     try {
-        const inputFilePath = path.join(tempDir, path.basename(config.key));
-        
-        const s3Object = await s3.getObject({ Bucket: config.bucketName, Key: config.key }).promise();
-        fs.writeFileSync(inputFilePath, s3Object.Body);
-
         for (let resolution of resolutions) {
             await generateFFmpegCommand(resolution, inputFilePath, tempDir);
         }
@@ -117,8 +96,6 @@ async function hlsConvert(config) {
     } catch (error) {
         console.error('Error executing transformations:', error);
         throw error;
-    } finally {
-        fs.rmdirSync(tempDir, { recursive: true });
     }
 }
 
