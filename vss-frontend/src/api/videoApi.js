@@ -1,16 +1,14 @@
 import axios from 'axios';
 
-const baseUrl = 'http://localhost:3006';
+const API_URL = 'http://localhost:3006';
 
 const getAuthToken = () => {
-  return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFycGl0MUBnbWFpbC5jb20iLCJpYXQiOjE3MTY3Mzg2MTgsImV4cCI6MTcxNjgyNTAxOH0.MZ8AhsMRd6Dp0RZVUU2YWuwODoLbZY96NK-Bsa1PGnM";
-  // return localStorage.getItem('jwtToken');
+  return localStorage.getItem('jwtToken');
 };
-
 
 export const getUserVideos = async (userId) => {
   try {
-    const response = await axios.get(`${baseUrl}/api/video/user/${userId}`,{
+    const response = await axios.get(`${API_URL}/api/video/user/${userId}`,{
       headers: {
         Authorization: `Bearer ${getAuthToken()}`,
       }
@@ -25,7 +23,7 @@ export const getUserVideos = async (userId) => {
 
 export const getS3SignedUrl = async () => {
   try {
-    const response = await axios.get(`${baseUrl}/api/video/s3-signed-url`,{
+    const response = await axios.get(`${API_URL}/api/video/s3-signed-url`,{
       headers: {
         Authorization: `Bearer ${getAuthToken()}`,
       }
@@ -56,7 +54,7 @@ export const uploadFileToS3 = async (url, file, fileType) => {
 export const addVideoEntry = async (videoId, title, description="") => {
   try {
     const response = await axios.post(
-      `${baseUrl}/api/video/uploaded`,
+      `${API_URL}/api/video/uploaded`,
       {
         videoId,
         title,
