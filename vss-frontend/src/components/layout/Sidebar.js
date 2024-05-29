@@ -1,20 +1,31 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Box, List, ListItem, ListItemText } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Box, List } from '@mui/material';
+import CustomListItem from '../common/CustomListItem';
+import { HomeOutlined, PersonOutlineOutlined  , Logout } from '@mui/icons-material';
 
 const Sidebar = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Add your logout logic here, e.g., clear authentication tokens
+    localStorage.removeItem('jwtToken');
+    localStorage.removeItem('user');
     navigate('/login');
   };
+
+  const handleProfile = () => {
+    navigate('/profile');
+  }
+
+  const handleHome = () => {
+    navigate('/home');
+  }
 
   return (
     <Box
       sx={{
         width: '200px',
-        bgcolor: '#0041c2',
+        bgcolor: '#36393f',
         height: '100vh',
         display: 'flex',
         flexDirection: 'column',
@@ -23,52 +34,11 @@ const Sidebar = () => {
       }}
     >
       <List>
-        <ListItem
-          button
-          component={Link}
-          to="/home"
-          sx={{
-            '&:hover': {
-              bgcolor: '#2D68C4',
-              '& .MuiListItemText-root': {
-                color: 'white',
-              },
-            },
-          }}
-        >
-          <ListItemText primary="Home" />
-        </ListItem>
-        <ListItem
-          button
-          component={Link}
-          to="/profile"
-          sx={{
-            '&:hover': {
-              bgcolor: '#2D68C4',
-              '& .MuiListItemText-root': {
-                color: 'white',
-              },
-            },
-          }}
-        >
-          <ListItemText primary="Profile" />
-        </ListItem>
+        <CustomListItem icon={<HomeOutlined />} onClick={handleHome} text="Home" />
+        <CustomListItem icon={<PersonOutlineOutlined />} onClick={handleProfile} text="Profile" />
       </List>
       <List>
-        <ListItem
-          button
-          onClick={handleLogout}
-          sx={{
-            '&:hover': {
-              bgcolor: '#2D68C4',
-              '& .MuiListItemText-root': {
-                color: 'white',
-              },
-            },
-          }}
-        >
-          <ListItemText primary="Logout" />
-        </ListItem>
+        <CustomListItem icon={<Logout />} onClick={handleLogout} text="Logout" />
       </List>
     </Box>
   );

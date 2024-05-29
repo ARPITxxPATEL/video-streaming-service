@@ -20,13 +20,11 @@ const Register = () => {
   const handleRegister = async () => {
     try {
       const response = await register(username, email, password);
-      console.log(response)
       localStorage.setItem('jwtToken', response.data.userDetails.token);
       localStorage.setItem('user', JSON.stringify(response.data.userDetails));
       navigate('/home'); // Redirect to home page
     } catch (error) {
-      setError('Invalid email or password. Please try again.');
-      console.error('Login error:', error);
+      setError(error.message || 'An error occurred. Please try again.');
     }
   }
 
@@ -60,6 +58,7 @@ const Register = () => {
       setPassword={setPassword}
       setIsFormValid={setIsFormValid}
       />
+      {error && <p style={{ color: 'red' }}>{error}</p>}
       <RegisterPageFooter 
       handleRegister={handleRegister}
       isFormValid={isFormValid}
