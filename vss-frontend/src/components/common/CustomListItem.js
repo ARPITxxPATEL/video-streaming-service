@@ -10,8 +10,10 @@ const CustomListItem = ({ icon, onClick, text}) => {
         onClick={onClick}
         sx={{
         'color': '#b9bbbe',
+        border: '0px solid #0F0F0F',
+        borderRadius: '12px',
         '&:hover': {
-            bgcolor: '#303239',
+            bgcolor: '#464B54',
             color: 'white',
             '& .MuiListItemText-root': {
             color: 'white',

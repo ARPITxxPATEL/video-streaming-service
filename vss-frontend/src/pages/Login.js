@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
 import AuthBox from '../components/common/AuthBox'
 import LoginHeader from '../components/layout/LoginHeader';
 import LoginInputs from '../components/layout/LoginInputs';
 import LoginFooter from '../components/layout/LoginFooter';
 import { validateLoginForm } from '../shared/utils/validators';
-import { login } from '../api/auth';
+import { loginApi } from '../api/auth';
+import { AuthContext } from '../context/AuthContext';
+import { SnackbarContext } from '../context/SnackbarContext';
 
 
 const Login = () => {
@@ -13,8 +14,8 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isFormValid, setIsFormValid] = useState(false);
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
+  const { openSnackbar } = useContext(SnackbarContext);
 
   useEffect(() => {
     setIsFormValid(validateLoginForm({ email, password }));
@@ -22,13 +23,10 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await login(email, password);
-      localStorage.setItem('jwtToken', response.data.userDetails.token);
-      localStorage.setItem('user', JSON.stringify(response.data.userDetails));
-      navigate('/home'); // Redirect to home page
+      const response = await loginApi(email, password);
+      login(response.data.userDetails, response.data.userDetails.token);
     } catch (error) {
-      setError('Invalid email or password. Please try again.');
-      console.error('Login error:', error);
+      openSnackbar('Invalid email or password', 'error');
     }
   };
 
@@ -41,7 +39,6 @@ const Login = () => {
       password={password}
       setPassword={setPassword}
       />
-      {error && <p style={{ color: 'red' }}>{error}</p>}
       <LoginFooter 
         isFormValid={isFormValid}
         handleLogin={handleLogin}

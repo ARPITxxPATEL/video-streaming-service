@@ -1,30 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Typography } from '@mui/material';
 import AuthBox from '../components/common/AuthBox';
 import RegisterPageInputs from '../components/layout/RegisterInputs';
 import RegisterPageFooter from '../components/layout/RegisterFooter';
 import { validateRegisterForm } from '../shared/utils/validators';
-import { register } from '../api/auth';
-import { useNavigate } from 'react-router-dom';
+import { registerApi } from '../api/auth';
+import { AuthContext } from '../context/AuthContext';
+import { SnackbarContext } from '../context/SnackbarContext';
 
 const Register = () => {
-  const navigate = useNavigate();
-
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
 
   const [isFormValid, setIsFormValid] = useState(false);
+  const { login } = useContext(AuthContext);
+  const { openSnackbar } = useContext(SnackbarContext);
 
   const handleRegister = async () => {
     try {
-      const response = await register(username, email, password);
-      localStorage.setItem('jwtToken', response.data.userDetails.token);
-      localStorage.setItem('user', JSON.stringify(response.data.userDetails));
-      navigate('/home'); // Redirect to home page
+      const response = await registerApi(username, email, password);
+      login(response.data.userDetails, response.data.userDetails.token);
     } catch (error) {
-      setError(error.message || 'An error occurred. Please try again.');
+      openSnackbar(error, 'error');
     }
   }
 
@@ -58,7 +56,6 @@ const Register = () => {
       setPassword={setPassword}
       setIsFormValid={setIsFormValid}
       />
-      {error && <p style={{ color: 'red' }}>{error}</p>}
       <RegisterPageFooter 
       handleRegister={handleRegister}
       isFormValid={isFormValid}

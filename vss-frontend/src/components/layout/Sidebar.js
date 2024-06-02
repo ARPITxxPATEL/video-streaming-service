@@ -1,16 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, List } from '@mui/material';
 import CustomListItem from '../common/CustomListItem';
 import { HomeOutlined, PersonOutlineOutlined  , Logout } from '@mui/icons-material';
+import { AuthContext } from '../../context/AuthContext'
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const { logout } = useContext(AuthContext);
 
   const handleLogout = () => {
-    localStorage.removeItem('jwtToken');
-    localStorage.removeItem('user');
-    navigate('/login');
+    logout();
   };
 
   const handleProfile = () => {
@@ -22,15 +22,17 @@ const Sidebar = () => {
   }
 
   return (
+    <Box>
     <Box
       sx={{
         width: '200px',
-        bgcolor: '#36393f',
+        bgcolor: '#2F3238',
         height: '100vh',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         color: 'white',
+        padding: '02px 16px',
       }}
     >
       <List>
@@ -40,6 +42,7 @@ const Sidebar = () => {
       <List>
         <CustomListItem icon={<Logout />} onClick={handleLogout} text="Logout" />
       </List>
+    </Box>
     </Box>
   );
 };

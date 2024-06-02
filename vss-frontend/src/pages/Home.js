@@ -1,18 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState, useContext } from 'react';
 import { Grid, Card, CardMedia, CardContent, Typography } from '@mui/material';
 import { Box } from '@mui/system';
+import { getAllVideosURL, getThumbnailImageURL } from '../api/videoApi'; 
+import { SnackbarContext } from '../context/SnackbarContext';
 
 const Home = () => {
   const [videos, setVideos] = useState([]);
+  const { openSnackbar } = useContext(SnackbarContext);
 
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const response = await axios.get('http://localhost:3306/api/video/list');
+        const response = await getAllVideosURL();
         setVideos(response.data);
+        console.log(response.data)
       } catch (error) {
-        console.error('Error fetching videos:', error);
+        openSnackbar(error, 'error');
       }
     };
 
@@ -22,14 +25,15 @@ const Home = () => {
   return (
     <Box p={2}>
       <Grid container spacing={2}>
-        {videos.map((video) => (
+        
+        {videos.length>0 && (videos.map((video) => (
           <Grid item xs={12} sm={6} md={4} lg={3} key={video.video_id}>
             <Card>
               <CardMedia
                 component="img"
                 alt={video.title}
                 height="140"
-                image=""
+                image={getThumbnailImageURL(video.video_id)}
                 title={video.title}
               />
               <CardContent>
@@ -39,7 +43,11 @@ const Home = () => {
               </CardContent>
             </Card>
           </Grid>
-        ))}
+        )))}
+
+        {videos.length === 0 && (
+          <Typography variant="h6">No videos found.</Typography>
+        )}
       </Grid>
     </Box>
   );
