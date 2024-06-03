@@ -1,10 +1,10 @@
-const Owner = require('../../models/ownerModel');
+const Video = require('../../models/videoModel');
 
 const getVideoList = (req, res) => {
-    Owner.getProcessedVideos((err, data) => {
+    Video.getAll((err, data) => {
         if (err) {
             res.status(500).send({
-                message: "Error retrieving processed videos"
+                message: "Error retrieving videos"
             });
         } else {
             res.status(200).send(data);

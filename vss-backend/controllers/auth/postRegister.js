@@ -29,7 +29,9 @@ const postRegister = async (req, res) => {
     });
 
     if(userExists){
-      return res.status(409).send('E-mail already in use.');
+      return res.status(409).send({
+        message: 'E-mail already in use.'
+      });
     }
 
     // encrypt password
@@ -69,7 +71,9 @@ const postRegister = async (req, res) => {
     });
 
   } catch(err){
-    return res.status(500).send("Error occured. Please try again");
+    return res.status(500).send({
+      message: "Error occured. Please try again"
+    });
   }
 }  
 

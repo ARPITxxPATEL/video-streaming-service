@@ -15,6 +15,8 @@ const videoIdSchema = Joi.object({
 const uploadSchema = Joi.object({
     video_id: Joi.string().required(),
     title: Joi.string().required(),
+    description: Joi.string().allow(null, ''),
+    user_id: Joi.number().required()
 });
 
 router.get('/list', auth, videoController.controllers.getVideoList);

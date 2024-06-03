@@ -4,7 +4,6 @@ const Video = function(video) {
     this.video_id = video.video_id;
     this.title = video.title;
     this.description = video.description;
-    this.hls_url = video.hls_url;
     this.status = video.status;
 };
 
@@ -61,6 +60,19 @@ Video.updateStatus = (video_id, status, result) => {
             result(null, { video_id: video_id, status: status });
         }
     );
+};
+
+Video.getAll = (result) => {
+    connection.query("SELECT * FROM videos WHERE status = 'processed'", (err, res) => {
+        if (err) {
+            console.log("error: ", err);
+            result(null, err);
+            return;
+        }
+        
+        console.log("videos: ", res);
+        result(null, res);
+    });
 };
 
 module.exports = Video;
