@@ -8,6 +8,7 @@ import Sidebar from './components/layout/Sidebar';
 import { Container, Box } from '@mui/material';
 import { AuthContext, AuthProvider } from './context/AuthContext';
 import { SnackbarProvider } from './context/SnackbarContext';
+import { FullscreenProvider } from './context/FullscreenContext';
 
 const ProtectedRoute = ({ element }) => {
   const { isLoggedIn } = useContext(AuthContext);
@@ -21,6 +22,7 @@ function App() {
     <Router>
       <SnackbarProvider>
       <AuthProvider>
+      <FullscreenProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -47,6 +49,7 @@ function App() {
           }
         />
       </Routes>
+      </FullscreenProvider>
       </AuthProvider>
       </SnackbarProvider>
     </Router>

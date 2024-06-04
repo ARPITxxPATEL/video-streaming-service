@@ -8,9 +8,9 @@ export const getThumbnailImageURL = (video_id) => {
   return `${THUMBNAIL_CLOUD_API_URL}/${video_id}.jpeg`;
 }
 
-export const getAllVideosURL = async () => {
+export const getAllVideos = async () => {
   try{
-    const response = axios.get(`${API_URL}/api/video/list`, {
+    const response = await axios.get(`${API_URL}/api/video/list`, {
       headers: {
         Authorization: `Bearer ${getAuthToken()}`,
       },
@@ -50,6 +50,20 @@ export const getS3SignedUrl = async () => {
   }
 };
 
+export const getS3SignedCookieForVideo = async (video_id) => {
+  try {
+    const response = await axios.get(`${API_URL}/api/video/signed-cookie/video/${video_id}`, {
+      headers: {
+        Authorization: `Bearer ${getAuthToken()}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error getting signed cookie for video:', error);
+    throw error;
+  }
+}
+
 
 export const uploadFileToS3 = async (url, file, fileType) => {
   try {
@@ -66,7 +80,7 @@ export const uploadFileToS3 = async (url, file, fileType) => {
 };
 
 
-export const addVideoEntry = async (video_id, title, description) => {
+export const addVideoEntry = async (video_id, title, description, user_id) => {
   try {
     const response = await axios.post(
       `${API_URL}/api/video/uploaded`,
@@ -74,6 +88,7 @@ export const addVideoEntry = async (video_id, title, description) => {
         video_id,
         title,
         description,
+        user_id,
       },
       {
         headers: {

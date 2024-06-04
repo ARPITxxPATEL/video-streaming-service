@@ -6,7 +6,7 @@ import { getUserVideos } from '../../api/videoApi';
 
 const ProfileTabs = () => {
   const [tabIndex, setTabIndex] = useState(0);
-  const [videos, setVideos] = React.useState([]);
+  const [videos, setVideos] = useState([]);
 
   const user = JSON.parse(localStorage.getItem('user'));
 
@@ -29,8 +29,8 @@ const ProfileTabs = () => {
   return (
     <Box mt={4}>
       <Tabs value={tabIndex} onChange={handleTabChange}>
-        <Tab label="My Videos" />
-        <Tab label="Upload Video" />
+        <Tab label="My Videos" sx={{color: 'white'}} />
+        <Tab label="Upload Video" sx={{color: 'white'}} />
       </Tabs>
       {tabIndex === 0 && (
         <Box mt={2}>

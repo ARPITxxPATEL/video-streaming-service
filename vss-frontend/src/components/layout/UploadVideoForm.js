@@ -47,6 +47,8 @@ const UploadForm = () => {
   const [file, setFile] = useState(null);
   const { openSnackbar } = useContext(SnackbarContext);
 
+  const user = JSON.parse(localStorage.getItem('user'));
+
   const onDrop = (acceptedFiles) => {
     const mp4File = acceptedFiles.find((file) => file.type === 'video/mp4');
     if (mp4File && mp4File.size <= 60 * 1024 * 1024) {
@@ -68,7 +70,7 @@ const UploadForm = () => {
     try {
       const { videoId, uploadUrl } = await getS3SignedUrl();
       await uploadFileToS3(uploadUrl, file, file.type);
-      await addVideoEntry(videoId, title, description);
+      await addVideoEntry(videoId, title, description, user.user_id);
       openSnackbar('Video uploaded successfully!', 'success');
     } catch (error) {
       openSnackbar('Error uploading file: ' + error.message, 'error');
