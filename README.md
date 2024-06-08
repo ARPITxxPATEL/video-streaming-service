@@ -1,5 +1,9 @@
 # Video Streaming Service Application
 
+## Project Status
+
+**Status**: This project is currently in progress. Some features and components may not be fully implemented or finalized.
+
 ## Overview
 
 This repository contains a video streaming service application built using React for the frontend, Express for the backend, and JavaScript for the video transcode service. The application leverages various AWS services to ensure scalability, reliability, and performance.
